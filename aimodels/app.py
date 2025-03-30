@@ -3,7 +3,11 @@ import pickle
 import numpy as np
 import pandas as pd
 from flask_cors import CORS
-from recommendation import recommend_doctor  # MongoDB-based recommendation logic
+from recommendation import recommend_doctor 
+import tensorflow as tf
+from PIL import Image
+import os
+ 
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend JS
@@ -55,6 +59,38 @@ def get_precaution_and_symptoms(disease_name):
 @app.route("/")
 def home():
     return render_template("index.html", symptoms=unique_symp)
+
+# Load trained model
+model = tf.keras.models.load_model("skin_disease_model_v2.h5")
+
+# Load class names
+with open("class_names.pkl", "rb") as file:
+    class_names = pickle.load(file)
+
+# Function to preprocess image
+def preprocess_image(image):
+    img = image.resize((128, 128))  # Resize to match model input size
+    img = np.array(img) / 255.0  # Normalize pixel values
+    img = np.expand_dims(img, axis=0)  # Add batch dimension
+    return img
+
+
+# ✅ Prediction Route (Allows POST requests)
+@app.route("/predictimg/", methods=["POST"])
+def predicts_img():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"})
+    
+    file = request.files['file']
+    image = Image.open(file).convert("RGB")  # Open uploaded image
+    processed_img = preprocess_image(image)  # Preprocess image
+
+    predictions = model.predict(processed_img)
+    predicted_class = class_names[np.argmax(predictions)]
+    confidence = np.max(predictions)
+
+    return jsonify({"predicted_class": predicted_class, "confidence": float(confidence)})
+
 
 # Prediction API
 @app.route("/predict", methods=["POST"])

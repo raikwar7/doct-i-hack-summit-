@@ -224,6 +224,77 @@
         html {
             scroll-behavior: smooth;
         }
+        .container-img {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 850px;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        /* Custom File Upload Button */
+        .upload-btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .upload-btn:hover {
+            background: #2980b9;
+        }
+        
+        /* Image Preview */
+        #preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            margin-top: 15px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Predict Button */
+        .predict-btn {
+            background: #27ae60;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .predict-btn:hover {
+            background: #219150;
+        }
+        
+        /* Result Styling */
+        #results {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .img-body{
+            display:flex;
+            justify-content:center;
+
+        }
         
     </style>
     <script>
@@ -325,5 +396,30 @@
 
         <div id="result"></div>
     </div>
+
+   <div class="img-body">
+    <div class="container-img">
+        <h2>Upload an Image for Skin Disease Prediction</h2>
+
+        <form id="upload-form">
+            <label for="file-input" class="upload-btn">
+                Choose an Image
+                <input type="file" id="file-input" accept="image/*" required hidden>
+            </label>
+            <br><br>
+
+            <img id="preview" src="" alt="Image Preview" class="hidden">
+            <br><br>
+
+            <button type="submit-img" class="predict-btn">Predict</button>
+        </form>
+
+        <h3 id="results"></h3>
+    </div>
+</div>
+
+
+
+    <script src="{{ url_for('static', filename='img.js') }}"></script>
 </body>
 </html>
