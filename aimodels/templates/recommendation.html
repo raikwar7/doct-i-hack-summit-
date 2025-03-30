@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Recommendation</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef2f5;
+      padding: 20px;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 32px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #34495e;
+      font-size: 18px;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #2980b9;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1f6390;
+    }
+
+    .doctor-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .doctor-card {
+      background: #fff;
+      width: 300px;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .doctor-card:hover {
+      transform: translateY(-15px) rotateX(5deg) rotateY(-5deg);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .doctor-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #2980b9;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .doctor-card strong {
+      font-size: 22px;
+      color: #2c3e50;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .doctor-info {
+      color: #555;
+      font-size: 16px;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .book-btn {
+      background-color: #27ae60;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 15px;
+      width: 100%;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .book-btn:hover {
+      background-color: #1e8449;
+    }
+
+    #result p {
+      display:flex;
+      justify-content:center;
+      font-size: 28px;
+      color:rgb(0, 0, 0);
+    }
+
+    @media (max-width: 1000px) {
+      .doctor-card {
+        width: 45%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .doctor-card {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h2>Recommended Doctors</h2>
+
+<div id="info">Loading options...</div>
+
+<div>
+  <label>Select Disease:</label>
+  <select id="diseaseSelect"></select>
+</div>
+
+<div>
+  <label>Select Location:</label>
+  <select id="locationSelect"></select>
+</div>
+
+<button onclick="fetchDoctors()">Get Recommendations</button>
+
+<div id="result"></div>
+
+<script>
+  let selectedDoctorId = null;  // Store doctor ID when booked
+
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  const predictedDisease = getQueryParam('disease');
+
+  // Load diseases and locations dynamically from backend
+  fetch('/get_options')
+    .then(res => res.json())
+    .then(data => {
+      const diseaseSelect = document.getElementById('diseaseSelect');
+      const locationSelect = document.getElementById('locationSelect');
+
+      data.diseases.forEach(disease => {
+        const option = document.createElement('option');
+        option.value = disease;
+        option.textContent = disease;
+        if (disease === predictedDisease) option.selected = true;
+        diseaseSelect.appendChild(option);
+      });
+
+      data.locations.forEach(location => {
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        locationSelect.appendChild(option);
+      });
+
+      document.getElementById('info').innerHTML = `<strong>Predicted Disease:</strong> ${predictedDisease}`;
+    });
+
+  function fetchDoctors() {
+    const selectedDisease = document.getElementById('diseaseSelect').value;
+    const selectedLocation = document.getElementById('locationSelect').value;
+
+    if (!selectedDisease || !selectedLocation) {
+      alert("Please select both disease and location");
+      return;
+    }
+
+    fetch('/recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ disease: selectedDisease, location: selectedLocation })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const resultDiv = document.getElementById('result');
+      if (data.error) {
+        resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+        return;
+      }
+      if (data.doctors.length === 0) {
+        resultDiv.innerHTML = "<p>No doctors found.</p>";
+        return;
+      }
+
+      let output = `<p><strong>Consult to a : &nbsp; </strong> ${data.specialization}  (Specialist)</p>`;
+      output += '<div class="doctor-grid">';
+      data.doctors.forEach(doc => {
+        output += `
+          <div class="doctor-card">
+            <img class="doctor-avatar" src="./static/Screenshot 2025-03-26 153010.png" alt="Doctor Avatar">
+            <strong> ${doc.name}</strong>
+            <div class="doctor-info"><b>Specialization:</b> ${doc.specialization}</div>
+            <div class="doctor-info"><b>Location:</b> ${doc.location}</div>
+            <div class="doctor-info"><b>Fee:</b> ₹${doc.consultancy_fee}</div>
+            <div class="doctor-info"><b>Rating:</b> ${doc.ratings} ⭐ (${doc.number_of_ratings} reviews)</div>
+            <div class="doctor-info"><b>Slot:</b> ${doc.slot_timing}</div>
+            <div class="doctor-info"><b>Phone No.:</b> ${doc['Phone No']}</div>
+            <div class="doctor-info"><b>E-mail:</b> ${doc['Mail ID']}</div>
+            <button class="book-btn" onclick="bookDoctor('${doc.doctor_id}')">Book Appointment</button>
+          </div>
+        `;
+      });
+      output += '</div>';
+      resultDiv.innerHTML = output;
+    })
+    .catch(() => {
+      document.getElementById('result').innerHTML = "Failed to load recommendations.";
+    });
+  }
+
+  function bookDoctor(doctorId) {
+    selectedDoctorId = doctorId;
+
+    // Copy doctor ID to clipboard
+    navigator.clipboard.writeText(selectedDoctorId).then(() => {
+        console.log("Selected Doctor ID copied:", selectedDoctorId);
+        alert(`we are forwarding to you on managementportal paste your do  id their Doctor ID: ${selectedDoctorId} copied to clipboard.`);
+
+        // Redirect to the doctor management system
+        window.location.href = "http://localhost:3000";
+    }).catch(err => {
+        console.error("Failed to copy:", err);
+        alert("Failed to copy Doctor ID. Please copy manually.");
+    });
+}
+
+</script>
+
+
+</body>
+</html>

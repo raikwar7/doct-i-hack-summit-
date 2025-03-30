@@ -1,0 +1,7 @@
+# Force GitHub to recognize Python as the main language
+*.py linguist-detectable=true
+
+# Exclude unwanted files from language stats
+node_modules/* linguist-vendored
+*.md linguist-documentation
+*.json linguist-generated

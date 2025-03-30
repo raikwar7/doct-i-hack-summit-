@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Prediction</title>
+    <style> 
+         
+
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #f0f8ff; /* light sky blue fallback */
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 90%;
+            margin: 0 auto;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .content-box {
+            background: url('./static/close-up-stethoscope-blank-blue-background.jpg') no-repeat center center / cover;
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            min-height: 650px;
+            animation: fadeIn 1.5s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .content-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.6); /* soft overlay for better text readability */
+            backdrop-filter: blur(1px);
+            z-index: 0;
+            border-radius: 20px;
+        }
+        
+        .content-box * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content-box h1 {
+            padding: 3rem;
+            padding-bottom:0rem;
+              font-size: 4rem;
+            font-weight: 700;
+              color: #0077cc;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content-box p {
+            padding-left:2.2rem;
+            font-size: 22px;
+            margin-bottom: 60px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            margin: 17px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn-primary {
+            background-color: #0077cc;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 119, 204, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background-color: #005fa3;
+            transform: translateY(-3px);
+        }
+        
+        .btn-secondary {
+            background-color: #ff5722;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e64a19;
+            transform: translateY(-3px);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h2 {
+            color: #0077cc;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        #searchBox {
+            width: 100%;
+            max-width: 600px;
+            padding: 14px;
+            margin: 20px auto;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .symptom-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .symptom-container label {
+            background: #f0f0f0;
+            padding: 12px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        
+        .symptom-container input {
+            display: none;
+        }
+        
+        .symptom-container input:checked + label {
+            background: #4caf50;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: background 0.3s, transform 0.3s;
+        }
+        
+        button:hover {
+            background: #45a049;
+            transform: translateY(-3px);
+        }
+        
+        .result {
+            margin-top: 25px;
+            text-align: left;
+            padding: 20px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result h3 {
+            color: #d32f2f;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        
+        .result ol {
+            padding-left: 25px;
+            line-height: 1.8;
+        }
+        
+        .recommend-btn {
+            background: #ff9800;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .recommend-btn:hover {
+            background: #e68900;
+            transform: translateY(-3px);
+        }
+        
+        /* Optional - Add a smooth scroll effect for page navigation */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+    </style>
+    <script>
+        function predictDisease() {
+            let symptoms = [];
+            document.querySelectorAll("input[name='symptoms']:checked").forEach(sym => {
+                symptoms.push(sym.value);
+            });
+
+            if (symptoms.length === 0) {
+                document.getElementById("result").innerHTML = `<p style="color:red;">Please select at least one symptom.</p>`;
+                return;
+            }
+
+            fetch("/predict", {
+                method: "POST",
+                body: new URLSearchParams({ "symptoms": symptoms }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+                    return;
+                }
+            
+                let selectedDiseasesHTML = "<h4>Top Predicted Diseases:</h4><ol>";
+                data.selected_diseases.forEach(disease => {
+                    selectedDiseasesHTML += `
+                        <li>
+                            <strong>${disease.disease}</strong> (${disease.confidence}%)<br>
+                            <strong>Description:</strong> ${disease.description}<br>
+                            <strong>Precautions:</strong> ${disease.precautions.join(", ")}<br>
+                            <button class="recommend-btn" onclick="redirectToDoctor('${disease.disease}')">Find a Doctor</button>
+                        </li><br>
+                    `;
+                });
+                selectedDiseasesHTML += "</ol>";
+            
+                let top7HTML = "<h4>Top 7 Disease Predictions (for reference):</h4><ol>";
+                data.top_7.forEach(disease => {
+                    top7HTML += `<li>${disease[0]} (${disease[1]}%)</li>`;
+                });
+                top7HTML += "</ol>";
+            
+                document.getElementById("result").innerHTML = `
+                    <div class="result">
+                        ${selectedDiseasesHTML}
+                        ${top7HTML}
+                    </div>
+                `;
+            })
+            .catch(error => {
+                document.getElementById("result").innerHTML = `<p style="color:red;">Error fetching data.</p>`;
+            });
+
+        }
+            
+
+        function redirectToDoctor(disease) {
+            window.location.href = `/recommendation?disease=${encodeURIComponent(disease)}`;
+        }
+        
+
+        function filterSymptoms() {
+            let searchValue = document.getElementById("searchBox").value.toLowerCase();
+            document.querySelectorAll(".symptom-container label").forEach(label => {
+                if (label.innerText.toLowerCase().includes(searchValue)) {
+                    label.style.display = "inline-block";
+                } else {
+                    label.style.display = "none";
+                }
+            });
+        }
+    </script>
+</head>
+<body> 
+    <div class="content-box">
+        <h1>AI Disease Predictor & Doctor Recommender</h1>
+        <p>"Enter your symptoms and let our advanced AI help you understand potential health conditions. Find expert doctors for further care."</p>
+        <button class="btn btn-primary" onclick="location.href='#searchBox'">Predict Disease</button>
+        <button class="btn btn-secondary" onclick="redirectToDoctor()">Find Recommended Doctors</button>
+
+    </div>
+
+    <div class="container">
+        <h2>Select Symptoms</h2>
+        <input type="text" id="searchBox" onkeyup="filterSymptoms()" placeholder="Search symptoms...">
+
+        <form onsubmit="event.preventDefault(); predictDisease();">
+            <div class="symptom-container">
+                {% for symptom in symptoms %}
+                    <input type="checkbox" id="sym{{ loop.index }}" name="symptoms" value="{{ symptom }}">
+                    <label for="sym{{ loop.index }}">{{ symptom }}</label>
+                {% endfor %}
+            </div>
+            <button type="submit">Predict Disease</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+</body>
+</html>

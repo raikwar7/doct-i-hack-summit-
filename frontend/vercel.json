@@ -1,0 +1,36 @@
+{
+  "routes":[
+      {
+          "src": "/",
+          "dest": "/"
+      },
+      {
+          "src":"/registerDoctor",
+          "dest": "/"
+      },
+      {
+          "src":"/registerPatient",
+          "dest": "/"
+      },
+      {
+          "src":"/loginDoctor",
+          "dest": "/"
+      },
+      {
+          "src":"/searchDoctors",
+          "dest": "/"
+      },
+      {
+          "src":"/bookingDoctor",
+          "dest": "/"
+      },
+      {
+          "src":"/doctordetails",
+          "dest": "/"
+      },
+      {
+          "src":"/patientdetails",
+          "dest": "/"
+      }
+  ]
+}
