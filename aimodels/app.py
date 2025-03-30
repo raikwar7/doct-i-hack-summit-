@@ -159,6 +159,11 @@ def recommendation_page():
     disease = request.args.get('disease', '')
     return render_template('recommendation.html', disease=disease)
 
+@app.route("/nearhosp")
+def nearhosp():
+    return render_template("nearhosp.html")
+
+
 
 # Flask App Runner
 if __name__ == "__main__":
