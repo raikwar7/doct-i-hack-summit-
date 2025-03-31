@@ -17,6 +17,7 @@ import axios from "axios";
 import DoctorDetails from "./components/Mybooking/DoctorDetails";
 import PatientDetails from "./components/Mybooking/PatientDetails";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Admin from "./pages/Admin/Admin";
 // import isLoggedIn1 from "./Recoil/Recoil";
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />}></Route>
         {/* <Route path="/dashboard" element={<Dashboard />}></Route> */}
+        <Route path="/admin" element={<Admin />}></Route>
         {/* <Route path="/signin" element={<SignIn />}></Route> */}
         <Route path="/registerDoctor" element={<DoctorRegister />}></Route>
         <Route path="/registerPatient" element={<PatientRegister />}></Route>

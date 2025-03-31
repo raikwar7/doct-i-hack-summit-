@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import List from "./List";
 
 const Bookings = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const userId = useRecoilValue(Atoms.userId);
   const [appointments, setAppointments] = useRecoilState(Atoms.appointments);
   const getBookings = async () => {
@@ -46,7 +46,11 @@ const Bookings = () => {
   };
 
   useEffect(() => {
-    getBookings();
+    if (appointments.length === 0) {
+      getBookings();
+    } else {
+      setLoading(false);
+    }
   }, [userId]);
 
   return (

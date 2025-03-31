@@ -3,11 +3,10 @@ import pickle
 import numpy as np
 import pandas as pd
 from flask_cors import CORS
-from recommendation import recommend_doctor 
+from recommendation import recommend_doctor
 import tensorflow as tf
 from PIL import Image
 import os
- 
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend JS
@@ -18,13 +17,13 @@ with open("models/disease_model (1).pkl", "rb") as file:
 
 # Load Disease to Specialization Mapping
 df = pd.read_csv("dataset/updated_disease_to_specialization.csv")
-disease_to_speciality = dict(zip(df['Disease'], df['Specialization']))
+disease_to_speciality = dict(zip(df['Disease'].str.lower(), df['Specialization']))
 
 # Load Description and Precaution Data
-dataf1 = pd.read_csv("dataset/symptom_Description.csv")
-datap = pd.read_csv("dataset/symptom_precaution (3).csv")
-dataf1.columns = dataf1.columns.str.strip()
-datap.columns = datap.columns.str.strip()
+desc_df = pd.read_csv("dataset/symptom_Description.csv")
+precaution_df = pd.read_csv("dataset/symptom_precaution (3).csv")
+desc_df.columns = desc_df.columns.str.strip()
+precaution_df.columns = precaution_df.columns.str.strip()
 
 # Utility: Convert Symptoms to Vector
 def sym_to_vec(symptoms, symptom_list):
@@ -47,10 +46,11 @@ def predict_disease(input_symptoms):
 
 # Fetch Description and Precautions
 def get_precaution_and_symptoms(disease_name):
-    result = dataf1[dataf1["Disease"].str.lower() == disease_name.lower()]
+    """Retrieve disease description and precautions."""
+    result = desc_df[desc_df["Disease"].str.lower() == disease_name.lower()]
     if not result.empty:
         description = result.iloc[0].get("Description", "No description available")
-        precautions = datap[datap["Disease"].str.lower() == disease_name.lower()].iloc[:, 1:].values.flatten().tolist()
+        precautions = precaution_df[precaution_df["Disease"].str.lower() == disease_name.lower()].iloc[:, 1:].values.flatten().tolist()
         precautions = [p for p in precautions if isinstance(p, str)]
         return description, precautions if precautions else ["No Precautions Available"]
     return "No description available", ["No Precautions Available"]
@@ -60,7 +60,7 @@ def get_precaution_and_symptoms(disease_name):
 def home():
     return render_template("index.html", symptoms=unique_symp)
 
-# Load trained model
+# Load trained image model once
 model = tf.keras.models.load_model("skin_disease_model_v2.h5")
 
 # Load class names
@@ -73,7 +73,6 @@ def preprocess_image(image):
     img = np.array(img) / 255.0  # Normalize pixel values
     img = np.expand_dims(img, axis=0)  # Add batch dimension
     return img
-
 
 # ✅ Prediction Route (Allows POST requests)
 @app.route("/predictimg/", methods=["POST"])
@@ -90,7 +89,6 @@ def predicts_img():
     confidence = np.max(predictions)
 
     return jsonify({"predicted_class": predicted_class, "confidence": float(confidence)})
-
 
 # Prediction API
 @app.route("/predict", methods=["POST"])
@@ -131,11 +129,10 @@ def predict():
 @app.route('/get_options')
 def get_options():
     diseases = sorted(df['Disease'].unique().tolist())  # Fetch diseases from your dataset
-    # Static unique locations as you shared
+    # Static unique locations
     locations = ['Hyderabad', 'Mumbai', 'Pune', 'Bangalore', 'Kolkata', 
                  'Jaipur', 'Chennai', 'Ahmedabad', 'Lucknow', 'Delhi']
     return jsonify({"diseases": diseases, "locations": locations})
-
 
 # Doctor Recommendation API
 @app.route('/recommend', methods=['POST'])
@@ -162,8 +159,6 @@ def recommendation_page():
 @app.route("/nearhosp")
 def nearhosp():
     return render_template("nearhosp.html")
-
-
 
 # Flask App Runner
 if __name__ == "__main__":

@@ -24,9 +24,14 @@ const BookingSchema = new mongoose.Schema({
     required: false,
     default: ""
   },
+  meetLink: {
+    type: String,
+    required: false,
+  },
   reportfile: {
     type: String,
     required: false,
+    default: ""
   },
   status: {
     type: String,

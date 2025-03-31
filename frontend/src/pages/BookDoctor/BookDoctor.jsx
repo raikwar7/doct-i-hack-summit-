@@ -5,6 +5,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import Atoms from "../../Recoils/Atoms";
 import Loading from "../../components/Loading";
+// import { storage } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid"; // For unique file names
+import { storage } from "../../../utils/firebase";
 
 const BookDoctor = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +19,8 @@ const BookDoctor = () => {
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
+  const [url, setUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,6 +49,29 @@ const BookDoctor = () => {
     }
   };
 
+   // 🔥 Upload file and return the download URL
+   const uploadFile = async () => {
+    try {
+      if (!file) return null;
+
+      const fileName = `${uuidv4()}-${file.name}`; // Unique file name
+      const fileRef = ref(storage, `reportFiles/${fileName}`);
+
+      await uploadBytes(fileRef, file); // Upload the file
+      const downloadURL = await getDownloadURL(fileRef); // Get file URL
+
+      console.log("File uploaded:", downloadURL);
+      toast.success("File uploaded successfully");
+      return downloadURL;  // Return the URL for API usage
+    } catch (error) {
+      toast.error("File upload failed");
+      console.error(error);
+      return null;
+    }
+  };
+
+
+
   // Handle form submission
   const handleSubmit = async (e) => {
     try {
@@ -53,6 +82,19 @@ const BookDoctor = () => {
         toast.error("Please fill all important fields.");
         return;
       }
+
+      let fileUrl = "";
+
+      if (file) {
+        // Wait until the file is uploaded before proceeding
+        fileUrl = await uploadFile();
+
+        if (!fileUrl) {
+          toast.error("File upload failed!");
+          setIsLoading(false);
+          return;
+        }
+      }      
 
       const config = {
         headers: {
@@ -67,14 +109,15 @@ const BookDoctor = () => {
           slot,
           doctor_id,
           patient_id: userId,
-          reportfile: "file",
+          reportfile: fileUrl,
         },
         { withCredentials: true },
         config
       );
       if (data.msg == "Booked Successfully") {
         toast.success("Booked Successfully!");
-        navigate("/")
+        console.log(data)
+        navigate("/");
       } else if (data.msg == "Booking Exist") {
         toast.success("Booking Exist");
       } else {
@@ -82,6 +125,7 @@ const BookDoctor = () => {
       }
     } catch (error) {
       toast.error("Error on Backend Side");
+      console.log(error)
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +174,9 @@ const BookDoctor = () => {
 
         {/* File Upload */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Upload File:</label>
+          <label className="block text-gray-700 mb-2">
+            Upload Report File (Optional):
+          </label>
           <input
             type="file"
             accept=".pdf,.jpg,.png"

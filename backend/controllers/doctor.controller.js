@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Doctor from "../models/doctor.model.js";
 import genOtp from "../utils/genOtp.js";
 import doctorAuth from "../zod/doctorAuth.js";
@@ -79,12 +80,10 @@ const doctorRegister = async (req, res) => {
       msg: "Doctor Registered",
     });
   } catch (error) {
-    console.log(
-      "error occur in the doctor.controller.js ===> " + error
-    );
+    console.log("error occur in the doctor.controller.js ===> " + error);
     return res.status(400).json({
-      msg: "Error on Backend side"
-    })
+      msg: "Error on Backend side",
+    });
   }
 };
 
@@ -129,7 +128,7 @@ const doctorLogin = async (req, res) => {
           msg: "Successfully Login",
           jwt: token,
           userId: isUser._id,
-          user: "Doctor"
+          user: "Doctor",
         });
       }
       return res.status(201).json({
@@ -164,7 +163,7 @@ const searchDoctor = async (req, res) => {
             },
           ],
         },
-        { licence: { $eq: doctor_id } }
+        { licence: { $eq: doctor_id } },
       ],
     }).select("-password");
     // const doctorsList = await Doctor.find({ location: { $eq: location }, specilization: {$eq: specilization} });
@@ -176,4 +175,50 @@ const searchDoctor = async (req, res) => {
   }
 };
 
-export { doctorRegister, doctorLogin, searchDoctor };
+const doctorVerify = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ msg: "Invalid Booking ID" });
+    }
+
+    const isVerify = await Doctor.findByIdAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          isVerify: "true",
+        },
+      }
+    );
+
+    if (isVerify) {
+      return res.status(200).json({
+        msg: "Doctor Verified",
+        isVerify,
+      });
+    }
+
+    return res.status(400).json({
+      msg: "Doctor Not Found",
+    });
+  } catch (error) {
+    console.log(
+      "Error occure in the doctorVerify.controller.js ===> " + error.message
+    );
+  }
+};
+
+const getDoctors = async (req, res) => {
+  try {
+    const doctors = await Doctor.find().select("-password");
+    return res.status(200).send(doctors);
+  } catch (error) {
+    console.log(
+      "Error occure in the getDoctors doctor.controller.js ===> " +
+        error.message
+    );
+  }
+};
+
+export { doctorRegister, doctorLogin, searchDoctor, doctorVerify, getDoctors };

@@ -14,7 +14,7 @@ const DoctorDetails = () => {
   const User = useRecoilValue(userRecoil);
   
   useEffect(() => {
-    if (!userId || User !== "Patient") {
+    if (!userId ) {
       console.log(userId);
       console.log(User);
       toast.error("You are not Logged in");

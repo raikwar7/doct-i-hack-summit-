@@ -30,6 +30,7 @@ const dotorSchema = new mongoose.Schema(
     licence: {
       type: String,
       required: true,
+      unique: true
     },
     password: {
       type: String,

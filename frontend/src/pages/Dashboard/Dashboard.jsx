@@ -14,6 +14,7 @@ const Dashboard = () => {
       {user=="Patient"? <Mybooking/>: <Bookings/>}
       
       
+      
       {/* <Mybooking/>
       <Bookings/> */}
       {/* <List/> */}

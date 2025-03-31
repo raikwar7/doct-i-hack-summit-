@@ -154,105 +154,119 @@
 <script>
   let selectedDoctorId = null;  // Store doctor ID when booked
 
-  function getQueryParam(param) {
+// Function to get query parameters from URL
+function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
-  }
+}
 
-  const predictedDisease = getQueryParam('disease');
+const predictedDisease = getQueryParam('disease');
 
-  // Load diseases and locations dynamically from backend
-  fetch('/get_options')
+// Load diseases and locations dynamically from backend
+fetch('/get_options')
     .then(res => res.json())
     .then(data => {
-      const diseaseSelect = document.getElementById('diseaseSelect');
-      const locationSelect = document.getElementById('locationSelect');
+        const diseaseSelect = document.getElementById('diseaseSelect');
+        const locationSelect = document.getElementById('locationSelect');
 
-      data.diseases.forEach(disease => {
-        const option = document.createElement('option');
-        option.value = disease;
-        option.textContent = disease;
-        if (disease === predictedDisease) option.selected = true;
-        diseaseSelect.appendChild(option);
-      });
+        data.diseases.forEach(disease => {
+            const option = document.createElement('option');
+            option.value = disease;
+            option.textContent = disease;
+            if (disease === predictedDisease) option.selected = true;
+            diseaseSelect.appendChild(option);
+        });
 
-      data.locations.forEach(location => {
-        const option = document.createElement('option');
-        option.value = location;
-        option.textContent = location;
-        locationSelect.appendChild(option);
-      });
+        data.locations.forEach(location => {
+            const option = document.createElement('option');
+            option.value = location;
+            option.textContent = location;
+            locationSelect.appendChild(option);
+        });
 
-      document.getElementById('info').innerHTML = `<strong>Predicted Disease:</strong> ${predictedDisease}`;
+        document.getElementById('info').innerHTML = `<strong>Predicted Disease:</strong> ${predictedDisease || "Not detected"}`;
+    })
+    .catch(() => {
+        document.getElementById('info').innerHTML = `<p style="color:red;">Failed to load disease & location options.</p>`;
     });
 
-  function fetchDoctors() {
+// Function to fetch recommended doctors
+function fetchDoctors() {
     const selectedDisease = document.getElementById('diseaseSelect').value;
     const selectedLocation = document.getElementById('locationSelect').value;
 
     if (!selectedDisease || !selectedLocation) {
-      alert("Please select both disease and location");
-      return;
+        alert("Please select both disease and location.");
+        return;
     }
 
     fetch('/recommend', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ disease: selectedDisease, location: selectedLocation })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ disease: selectedDisease, location: selectedLocation })
     })
     .then(res => res.json())
     .then(data => {
-      const resultDiv = document.getElementById('result');
-      if (data.error) {
-        resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
-        return;
-      }
-      if (data.doctors.length === 0) {
-        resultDiv.innerHTML = "<p>No doctors found.</p>";
-        return;
-      }
+        const resultDiv = document.getElementById('result');
 
-      let output = `<p><strong>Consult to a : &nbsp; </strong> ${data.specialization}  (Specialist)</p>`;
-      output += '<div class="doctor-grid">';
-      data.doctors.forEach(doc => {
-        output += `
-          <div class="doctor-card">
-            <img class="doctor-avatar" src="./static/Screenshot 2025-03-26 153010.png" alt="Doctor Avatar">
-            <strong> ${doc.name}</strong>
-            <div class="doctor-info"><b>Specialization:</b> ${doc.specialization}</div>
-            <div class="doctor-info"><b>Location:</b> ${doc.location}</div>
-            <div class="doctor-info"><b>Fee:</b> ₹${doc.consultancy_fee}</div>
-            <div class="doctor-info"><b>Rating:</b> ${doc.ratings} ⭐ (${doc.number_of_ratings} reviews)</div>
-            <div class="doctor-info"><b>Slot:</b> ${doc.slot_timing}</div>
-            <div class="doctor-info"><b>Phone No.:</b> ${doc['Phone No']}</div>
-            <div class="doctor-info"><b>E-mail:</b> ${doc['Mail ID']}</div>
-            <button class="book-btn" onclick="bookDoctor('${doc.doctor_id}')">Book Appointment</button>
-          </div>
-        `;
-      });
-      output += '</div>';
-      resultDiv.innerHTML = output;
+        if (data.error) {
+            resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+            return;
+        }
+
+        if (!data.doctors || data.doctors.length === 0) {
+            resultDiv.innerHTML = "<p>No doctors found.</p>";
+            return;
+        }
+
+        let output = `<p><strong>Consult a : &nbsp; </strong> ${data.specialization} (Specialist)</p>`;
+        output += '<div class="doctor-grid">';
+
+        data.doctors.forEach(doc => {
+            output += `
+                <div class="doctor-card">
+                    <img class="doctor-avatar" src="./static/Screenshot 2025-03-26 153010.png" alt="Doctor Avatar">
+                    <strong> ${doc.name}</strong>
+                    <div class="doctor-info"><b>Specialization:</b> ${doc.specilization}</div>
+                    <div class="doctor-info"><b>Location:</b> ${doc.location}</div>
+                    <div class="doctor-info"><b>Fee:</b> ₹${doc.fee}</div>
+                    <div class="doctor-info"><b>Rating:</b> ${doc.avgRating} ⭐ (${doc.totalReviews} reviews)</div>
+                    <div class="doctor-info"><b>Phone No.:</b> ${doc.phone}</div>
+                    <div class="doctor-info"><b>E-mail:</b> ${doc.gmail}</div>
+                    <button class="book-btn" onclick="bookDoctor('${doc.id}')">Book Appointment</button>
+                </div>
+            `;
+        });
+
+        output += '</div>';
+        resultDiv.innerHTML = output;
     })
     .catch(() => {
-      document.getElementById('result').innerHTML = "Failed to load recommendations.";
-    });
-  }
-
-  function bookDoctor(doctorId) {
-    selectedDoctorId = doctorId;
-
-    // Copy doctor ID to clipboard
-    navigator.clipboard.writeText(selectedDoctorId).then(() => {
-        console.log("Selected Doctor ID copied:", selectedDoctorId);
-        alert(`we are forwarding to you on managementportal paste your do  id their Doctor ID: ${selectedDoctorId} copied to clipboard.`);
-
-        // Redirect to the doctor management system
-        window.location.href = "http://localhost:3000";
-    }).catch(err => {
-        console.error("Failed to copy:", err);
-        alert("Failed to copy Doctor ID. Please copy manually.");
+        document.getElementById('result').innerHTML = "<p style='color:red;'>Failed to load recommendations.</p>";
     });
 }
+
+ 
+// Function to book doctor and copy ID to clipboard
+async function bookDoctor(doctorId) {
+  if (!doctorId) {
+      alert("❌ Error: Doctor ID is missing. Please try again.");
+      return;
+  }
+
+  selectedDoctorId = doctorId;
+
+  try {
+      await navigator.clipboard.writeText(selectedDoctorId);
+      alert(`✅ Doctor ID copied to clipboard!\n\n🔹 **Doctor ID:** ${selectedDoctorId}\n🔹 You will now be redirected to the management portal.\n\n📋 Paste the copied ID when prompted.`);
+      window.location.href = "http://localhost:3000";  // Redirect to the doctor management system
+  } catch (err) {
+      console.error("Clipboard Copy Failed:", err);
+      alert(`⚠️ Failed to copy Doctor ID automatically.\n\n🔹 **Doctor ID:** ${selectedDoctorId}\n\n📋 Please copy it manually and paste it in the portal.`);
+  }
+}
+
+
 
 </script>
 
