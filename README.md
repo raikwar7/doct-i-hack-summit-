@@ -1,7 +1,7 @@
-🚀 #Doct-i: AI-Powered Healthcare Assistant
-"Where Health and Convenience Are at Your Fingertips."
+# 🚀Doct-i: AI-Powered Healthcare Assistant
+## "Where Health and Convenience Are at Your Fingertips."
 
-🎯 Overview
+### 🎯 Overview
 Doct-i is an AI-powered healthcare platform designed to revolutionize early diagnosis and personalized care by providing:
 
 ✅ AI-driven disease prediction with probability scores
@@ -12,7 +12,7 @@ Doct-i is an AI-powered healthcare platform designed to revolutionize early diag
 ✅ Doctor management & verification system
 ✅ Emergency hospital locator (future feature)
 
-📌 Problem Statement
+### 📌 Problem Statement
 Millions of patients in India and globally struggle with:
 
 🔴 Delayed Diagnoses – Misdiagnosis and lack of early detection cause complications.
@@ -20,7 +20,7 @@ Millions of patients in India and globally struggle with:
 🔴 Inefficient Appointment Systems – Manual bookings cause delays.
 🔴 Overcrowded Hospitals – Long queues even for minor issues.
 
-🌟 Our Solution
+### 🌟 Our Solution
 🏥 For Patients
 🔹 AI Disease Prediction – Predict top 7 diseases with descriptions & precautions.
 🔹 Skin Disease Recognition – Upload a photo for instant AI-based diagnosis.
@@ -57,15 +57,6 @@ Doctors: Subscription for AI insights & profile listing.
 🛠️ API as a Service – Offer AI-powered diagnosis APIs to hospitals.
 🎯 Advertising & Sponsorships – Healthcare brands can display targeted ads.
 
-🛠 Tech Stack
-Technology	Purpose
-Frontend UI
-Backend API
-Database
-AI Model Hosting
-Machine Learning Models
-Containerization
-Cloud Hosting
 📂 Project Structure
 plaintext
 Copy
