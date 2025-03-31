@@ -239,8 +239,4 @@ For queries or improvements, please contact:
 ✅ **Feel free to contribute by raising issues or submitting pull requests.**\
 🔥 Happy Coding!
 
-=======
-# virtualdoc2
-A disease Predictor and Doctor Recommender Web-App
->>>>>>> e4e01d6 (Initial commit)
->>>>>>> 1d854ac (reqtxt)
+ 
