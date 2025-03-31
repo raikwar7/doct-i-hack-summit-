@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, send_file,request, jsonify
 import pickle
 import numpy as np
 import pandas as pd
@@ -7,6 +7,9 @@ from recommendation import recommend_doctor
 import tensorflow as tf
 from PIL import Image
 import os
+from xhtml2pdf import pisa
+import io
+
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend JS
@@ -160,6 +163,117 @@ def recommendation_page():
 def nearhosp():
     return render_template("nearhosp.html")
 
+@app.route('/insurances')
+def insurances():
+    return render_template('insurances.html')
+
+
+# Load the dataset once at startup
+try:
+    df = pd.read_csv("BMI_Diet_Recommendations_Corrected.csv")
+except Exception as e:
+    print(f"Error loading CSV file: {e}")
+    df = pd.DataFrame()  # Fallback if the file fails to load
+
+def calculate_bmi(height, weight):
+    try:
+        return round(weight / (height ** 2), 2)
+    except ZeroDivisionError:
+        return None
+
+def determine_bmi_category(bmi):
+    if bmi is None:
+        return "Invalid"
+    if bmi < 18.5:
+        return "Underweight"
+    elif 18.5 <= bmi < 24.9:
+        return "Normal weight"
+    elif 25 <= bmi < 29.9:
+        return "Overweight"
+    else:
+        return "Obesity"
+
+def format_recommendations(row):
+    """
+    Format recommendations in a structured format for JSON response.
+    """
+    row = row.fillna('N/A')  # Fill missing values with 'N/A'
+    diet_plan = row['Example Diet Plan']
+    meals = diet_plan.split('; ')
+
+    return {
+        "Category": row['Category'],
+        "Health Implications": row['Health Implications'],
+        "Diet Tips": row['Diet Tips'],
+        "Examples of Foods": row['Examples of Foods'],
+        "Exercise Routine": row['Exercise Routine'],
+        "Lifestyle Tips": row['Lifestyle Tips'],
+        "Snack Ideas": row['Snack Ideas'],
+        "Hydration Tips": row['Hydration Tips'],
+        "Supplements": row['Supplements'],
+        "Cooking Tips": row['Cooking Tips'],
+        "Daily Calorie Range": row['Daily Calorie Range'],
+        "Example Diet Plan": meals
+    }
+
+@app.route("/bmi", methods=["GET", "POST"])
+def bmi():
+    if request.method == "GET":
+        return render_template("bmi.html")  # Render the HTML page
+
+    if request.method == "POST":
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid JSON data"}), 400
+
+        height = data.get("height")
+        weight = data.get("weight")
+
+        if not isinstance(height, (int, float)) or not isinstance(weight, (int, float)):
+            return jsonify({"error": "Height and weight must be numbers"}), 400
+
+        bmi_value = calculate_bmi(height, weight)
+        category = determine_bmi_category(bmi_value)
+        row = df[df['Category'] == category].iloc[0]
+        recommendations = format_recommendations(row)
+
+        # Return all data from format_recommendations
+        return jsonify({
+            "bmi": bmi_value,
+            "category": category,
+            "recommendations": recommendations
+        })
+
+
+
+@app.route("/generate-pdf", methods=["POST"])
+def generate_pdf():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
+
+    # Extract data
+    bmi = data.get("bmi", "N/A")
+    category = data.get("category", "N/A")
+    recommendations = data.get("recommendations", {})
+
+    # Render HTML template for PDF
+    rendered_html = render_template(
+        "pdf_template.html", 
+        bmi=bmi, 
+        category=category, 
+        recommendations=recommendations
+    )
+
+    # Generate PDF
+    pdf_output = io.BytesIO()
+    pisa_status = pisa.CreatePDF(io.StringIO(rendered_html), dest=pdf_output)
+
+    if pisa_status.err:
+        return jsonify({"error": "Failed to generate PDF"}), 500
+
+    pdf_output.seek(0)
+    return send_file(pdf_output, download_name="BMI_Report.pdf", as_attachment=True)
 # Flask App Runner
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)  # use_reloader=False prevents double execution on Windows

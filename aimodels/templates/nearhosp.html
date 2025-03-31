@@ -14,12 +14,7 @@
             color: white;
             padding: 20px;
         }
-
-        h2 {
-            font-size: 26px;
-            font-weight: bold;
-        }
-
+        h2 { font-size: 26px; font-weight: bold; }
         .container {
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.2);
@@ -29,21 +24,18 @@
             max-width: 700px;
             margin: auto;
         }
-
         #map {
             height: 500px;
             width: 100%;
             border-radius: 12px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
         }
-
         #hospitalList {
             list-style: none;
             padding: 0;
             max-width: 600px;
             margin: auto;
         }
-
         .hospital-item {
             background: rgba(255, 255, 255, 0.3);
             padding: 15px;
@@ -53,11 +45,7 @@
             text-align: left;
             transition: 0.3s;
         }
-
-        .hospital-item:hover {
-            transform: scale(1.05);
-        }
-
+        .hospital-item:hover { transform: scale(1.05); }
         .btn {
             display: inline-block;
             padding: 10px 14px;
@@ -67,20 +55,8 @@
             font-weight: bold;
             transition: all 0.3s ease;
         }
-
-        .call-btn {
-            background: #27ae60;
-        }
-
-        .directions-btn {
-            background: #2980b9;
-        }
-
-        .btn:hover {
-            filter: brightness(1.2);
-            transform: translateY(-2px);
-        }
-
+        .directions-btn { background: #2980b9; }
+        .btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
         .find-btn {
             background: #ff6b6b;
             padding: 12px 18px;
@@ -93,33 +69,9 @@
             transition: all 0.3s ease;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
         }
-
-        .find-btn:hover {
-            background: #e84118;
-            transform: scale(1.1);
-        }
-
-        /* Emergency Sidebar Button */
-        .emergency-btn {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            background: red;
-            color: white;
-            padding: 15px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .emergency-btn:hover {
-            background: darkred;
-        }
-
+        .find-btn:hover { background: #e84118; transform: scale(1.1); }
     </style>
 </head>
-
 <body>
 
     <h2>Find Nearby Hospitals 🏥</h2>
@@ -136,9 +88,6 @@
         <div id="map"></div>
         <ul id="hospitalList"></ul>
     </div>
-
-    <!-- Emergency Hospital Sidebar Button -->
-    <div class="emergency-btn" onclick="fetchEmergencyHospitals()">🚑</div>
 
     <script>
         let map, userMarker, selectedLat, selectedLon;
@@ -177,6 +126,7 @@
                     fetchHospitals(selectedLat, selectedLon);
                 }, error => {
                     alert("⚠ Location access denied! Please allow location access.");
+                    initMap(28.6139, 77.2090); // Default: New Delhi
                 });
             } else {
                 alert("⚠ Geolocation is not supported by this browser.");
@@ -193,19 +143,12 @@
 
         function fetchHospitals(lat, lon) {
             const range = document.getElementById('radius').value;
-            fetchHospitalData(lat, lon, range, false);
-        }
-
-        function fetchEmergencyHospitals() {
-            fetchHospitalData(selectedLat, selectedLon, 5000, true);
-        }
-
-        function fetchHospitalData(lat, lon, range, emergency) {
             const overpassQuery = `
                 [out:json];
                 (
                     node["amenity"="hospital"](around:${range}, ${lat}, ${lon});
-                    node["healthcare"="hospital"](around:${range}, ${lat}, ${lon});
+                    way["amenity"="hospital"](around:${range}, ${lat}, ${lon});
+                    relation["amenity"="hospital"](around:${range}, ${lat}, ${lon});
                 );
                 out center;
             `;
@@ -213,28 +156,53 @@
             fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`)
                 .then(response => response.json())
                 .then(data => {
-                    const hospitalList = document.getElementById('hospitalList');
-                    hospitalList.innerHTML = '';
-
-                    let hospitals = data.elements.map(hospital => ({
-                        name: hospital.tags.name || "Unnamed Hospital",
-                        lat: hospital.lat,
-                        lon: hospital.lon,
-                        distance: getDistance(lat, lon, hospital.lat, hospital.lon)
-                    }));
-
-                    hospitals.sort((a, b) => a.distance - b.distance);
-
-                    hospitals.forEach(hospital => {
-                        L.marker([hospital.lat, hospital.lon], { color: emergency ? 'red' : 'blue' }).addTo(map)
-                            .bindPopup(`<strong>${hospital.name}</strong><br>📏 ${hospital.distance} km away`);
-                    });
-                });
+                    console.log("Hospital Data:", data);
+                    displayHospitals(data, lat, lon);
+                })
+                .catch(error => console.error("Error fetching hospitals:", error));
         }
 
-        function getDistance(lat1, lon1, lat2, lon2) {
-            return (6371 * Math.acos(Math.cos(lat1) * Math.cos(lat2) + Math.sin(lat1) * Math.sin(lat2))).toFixed(2);
+        function displayHospitals(data, lat, lon) {
+            const hospitalList = document.getElementById('hospitalList');
+            hospitalList.innerHTML = '';
+
+            if (!data.elements.length) {
+                hospitalList.innerHTML = '<p>No hospitals found in this range.</p>';
+                return;
+            }
+
+            data.elements.forEach(hospital => {
+                let name = hospital.tags?.name || "Unnamed Hospital";
+                let hospitalLat = hospital.lat || hospital.center?.lat;
+                let hospitalLon = hospital.lon || hospital.center?.lon;
+
+                if (hospitalLat && hospitalLon) {
+                    let distance = calculateDistance(lat, lon, hospitalLat, hospitalLon);
+                    let distanceText = distance ? `${distance.toFixed(2)} km` : "Unknown Distance";
+
+                    L.marker([hospitalLat, hospitalLon]).addTo(map)
+                        .bindPopup(`<strong>${name}</strong><br>📏 ${distanceText}`);
+
+                    hospitalList.innerHTML += `
+                        <li class="hospital-item">
+                            <strong>${name}</strong> <br>
+                            📏 <strong>${distanceText}</strong> <br>
+                            <a class="btn directions-btn" href="https://www.google.com/maps/dir/?api=1&destination=${hospitalLat},${hospitalLon}" target="_blank">📍 Get Directions</a>
+                        </li>
+                    `;
+                }
+            });
         }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function toRad(degrees) { return degrees * (Math.PI / 180); }
 
         useCurrentLocation();
     </script>
