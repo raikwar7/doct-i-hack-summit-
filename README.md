@@ -57,6 +57,27 @@ Doctors: Subscription for AI insights & profile listing.
 📊 Commission-Based – Earn from doctor bookings & pharmacy/lab referrals.
 🛠️ API as a Service – Offer AI-powered diagnosis APIs to hospitals.
 🎯 Advertising & Sponsorships – Healthcare brands can display targeted ads.
+# AI Disease Prediction and Doctor Recommendation
+
+## Features
+
+- **Disease Prediction**: Implements Random Forest for disease prediction based on symptoms.
+- **Skin Disease Classification**: Uses TensorFlow for image classification of skin diseases.
+- **Full-Stack Web App**: Developed using the MERN (MongoDB, Express, React, Node.js) stack with Firebase for file handling (PDFs, reports, etc.).
+- **Doctor Recommendation System**: Based on an average weighted model to recommend suitable doctors.
+- **Flask Server**: Backend API services for ML predictions and data handling.
+- **NLP Chatbot**: Built with Dialogflow, Flask, and Ngrok to provide real-time health information for patients and doctors, including the latest medical news.
+- **Datasets**: Utilized Kaggle and government healthcare datasets for training ML models and web data integration.
+- **Development Assistance**: ChatGPT was used to refine and optimize various parts of the system.
+
+## Technologies Used
+- **Machine Learning**: Scikit-Learn (Random Forest), TensorFlow (Image Classification)
+- **Backend**: Flask, FastAPI, Node.js, Express
+- **Frontend**: React.js
+- **Database**: MongoDB
+- **Authentication & Storage**: Firebase
+- **NLP & Chatbot**: Dialogflow, Flask
+- **Deployment & APIs**: Ngrok, RESTful APIs
 
 📂 Project Structure
 plaintext
