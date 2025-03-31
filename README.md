@@ -31,7 +31,7 @@ Millions of patients in India and globally struggle with:
 
 👨‍⚕️ For Doctors
 🔹 Doctor Profile Management – Verified doctors can list & manage profiles.
-🔹 Doctor Chatbot – Stay updated with latest research & guidelines.
+🔹 Doctor Chatbot – Stay updated with the latest research & guidelines.
 🔹 Appointment Management – View, approve, or reschedule patient bookings.
 
 🛠️ For Admin
@@ -57,9 +57,17 @@ Doctors: Subscription for AI insights & profile listing.
 🛠️ API as a Service – Offer AI-powered diagnosis APIs to hospitals.
 🎯 Advertising & Sponsorships – Healthcare brands can display targeted ads.
 
- 	
+🛠 Tech Stack
+Technology	Purpose
+Frontend UI
+Backend API
+Database
+AI Model Hosting
+Machine Learning Models
+Containerization
+Cloud Hosting
 📂 Project Structure
-graphql
+plaintext
 Copy
 Edit
 Doct-i/
@@ -67,13 +75,10 @@ Doct-i/
 │── backend/           # Node.js backend for API & authentication
 │── frontend/          # React-based frontend for UI
 │── README.md          # Project documentation
- 
- 
-Disease prediction
-
-Skin disease detection
-
-Doctor recommendation
+AI Models (FastAPI + Machine Learning)
+✔ Disease Prediction
+✔ Skin Disease Detection
+✔ Doctor Recommendation
 
 🚀 How to Run the Project
 📌 1. Clone the Repository
