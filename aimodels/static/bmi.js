@@ -16,7 +16,7 @@ document.getElementById('bmiForm').addEventListener('submit', async function(eve
         const data = await response.json();
 
         if (response.ok) {
-            const { bmi, category, recommendations } = data;
+            const { bmi, category, recommendationse } = data;
 
             // Display results
             document.getElementById('result').innerHTML = `
@@ -31,7 +31,7 @@ document.getElementById('bmiForm').addEventListener('submit', async function(eve
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ bmi, category, recommendations }),
+                    body: JSON.stringify({ bmi, category, recommendationse }),
                 });
 
                 if (pdfResponse.ok) {

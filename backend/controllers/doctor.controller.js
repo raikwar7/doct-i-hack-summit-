@@ -163,7 +163,7 @@ const searchDoctor = async (req, res) => {
             },
           ],
         },
-        { licence: { $eq: doctor_id } },
+        { _id: { $eq: doctor_id } },
       ],
     }).select("-password");
     // const doctorsList = await Doctor.find({ location: { $eq: location }, specilization: {$eq: specilization} });

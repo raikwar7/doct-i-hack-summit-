@@ -15,25 +15,119 @@ const SearchDoctors = () => {
   const [location, setLocation] = useState("");
   const [specilization, setSpecilization] = useState("");
   const [users, setUsers] = useState([]);
-
+  
   const specilizationArr = [
-    { val: "", name: "Choose Specialization" },
-    { val: "Dermatology", name: "Dermatology" },
-    { val: "Neurology", name: "Neurology" },
-    { val: "Gastroenterology", name: "Gastroenterology" },
-    { val: "Cardiology", name: "Cardiology" },
-    { val: "Pulmonology", name: "Pulmonology" },
-    { val: "Orthopedics", name: "Orthopedics" },
-    { val: "Urology", name: "Urology" },
+    {
+      val: "",
+      name: "Choose Specilization",
+    },
+    {
+      val: "Dermatology",
+      name: "Dermatology",
+    },
+    {
+      val: "Neurology",
+      name: "Neurology",
+    },
+    {
+      val: "Gastroenterology",
+      name: "Gastroenterology",
+    },
+    {
+      val: "Immunology",
+      name: "Immunology",
+    },
+    {
+      val: "Pulmonology",
+      name: "Pulmonology",
+    },
+    {
+      val: "Orthopedics",
+      name: "Orthopedics",
+    },
+    {
+      val: "Endocrinology",
+      name: "Endocrinology",
+    },
+    {
+      val: "Hepatology",
+      name: "Hepatology",
+    },
+    {
+      val: "Infectious Disease",
+      name: "Infectious Disease",
+    },
+    {
+      val: "Urology",
+      name: "Urology",
+    },
+    {
+      val: "Cardiology",
+      name: "Cardiology",
+    },
+    {
+      val: "General Medicine",
+      name: "General Medicine",
+    },
+    {
+      val: "Rheumatology",
+      name: "Rheumatology",
+    },
+    {
+      val: "Toxicology",
+      name: "Toxicology",
+    },
+    {
+      val: "Vascular Surgery",
+      name: "Vascular Surgery",
+    },
   ];
 
   const locationArr = [
-    { val: "", name: "Select Location" },
-    { val: "Hyderabad", name: "Hyderabad" },
-    { val: "Mumbai", name: "Mumbai" },
-    { val: "Pune", name: "Pune" },
-    { val: "Bangalore", name: "Bangalore" },
-    { val: "Delhi", name: "Delhi" },
+    {
+      val: "",
+      name: "Select Location (City)",
+    },
+    {
+      val: "Hyderabad",
+      name: "Hyderabad",
+    },
+    {
+      val: "Mumbai",
+      name: "Mumbai",
+    },
+    {
+      val: "Pune",
+      name: "Pune",
+    },
+    {
+      val: "Bangalore",
+      name: "Bangalore",
+    },
+    {
+      val: "Kolkata",
+      name: "Kolkata",
+    },
+    {
+      val: "Jaipur",
+      name: "Jaipur",
+    },
+    {
+      val: "Chennai",
+      name: "Chennai",
+    },
+    {
+      val: "Ahmedabad",
+      name: "Ahmedabad",
+    },
+    {
+      val: "Lucknow",
+      name: "Lucknow",
+    },
+    {
+      val: "Delhi",
+      name: "Delhi",
+    },
   ];
 
   const searchOptions = [
@@ -62,10 +156,16 @@ const SearchDoctors = () => {
           toast.error("Please Fill Up Important Details");
           return;
         }
+        const config = {
+          header:{
+            "Content-Type": "application/json"
+          }
+        }
         const { data } = await axios.post(
           `${import.meta.env.VITE_BACKENDURL}/api/v1/user/searchDoctor`,
           { doctor_id, location, specilization },
-          { withCredentials: true }
+          { withCredentials: true },
+          config
         );
         if (data.length) {
           setUsers(data);

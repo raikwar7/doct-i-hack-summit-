@@ -1,5 +1,6 @@
 import React from "react";
 import Dashboard from "./Dashboard/Dashboard";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   return (
@@ -17,11 +18,11 @@ const Home = () => {
         </p>
 
         {/* 3D Button */}
-        <div className="mt-6">
+        <Link to={"/searchDoctors"} className="mt-6">
           <button className="bg-white text-sky-600 px-6 py-3 rounded-full text-lg font-semibold shadow-lg hover:scale-105 transform transition-all duration-300 hover:shadow-xl">
             Get Started
           </button>
-        </div>
+        </Link>
       </div>
 
        

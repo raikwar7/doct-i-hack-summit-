@@ -30,7 +30,7 @@ const bookingDoctor = async (req, res) => {
 
     const isBooking = await Booking.findOneAndUpdate(
       { doctor_id, patient_id },
-      { $set: updateFields  },
+      { $set: {updateFields, reason : ""}  },
       { new: true, upsert: true }
     );
 

@@ -3,25 +3,25 @@ import Loading from "../../components/Loading";
 import InputContainer from "../../components/InputContainer/InputContainer";
 import { Link, useNavigate } from "react-router-dom";
 import Btn from "../../components/Btn";
-import axios from "axios";
 import toast from "react-hot-toast";
-import Sign from "../../components/Sign/Sign";
+import axios from "axios";
 import { useRecoilState } from "recoil";
 import Atoms from "../../Recoils/Atoms";
+import { FaUserMd } from "react-icons/fa";
 
 const LoginDoctor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [userId, setUserId] = useRecoilState(Atoms.userId)
-  const [user, setUser] = useRecoilState(Atoms.userRecoil)
+  const [userId, setUserId] = useRecoilState(Atoms.userId);
+  const [user, setUser] = useRecoilState(Atoms.userRecoil);
 
   const noInput = [
     {
       label: "Username",
       id: "username",
-      placeholder: "gaurav@gmail.com",
+      placeholder: "doctor@gmail.com",
       inputType: "text",
       onchange: (event) => {
         setUsername(event.target.value);
@@ -32,7 +32,6 @@ const LoginDoctor = () => {
       id: "password",
       placeholder: "*********",
       inputType: "password",
-      Icon: "",
       onchange: (event) => {
         setPassword(event.target.value);
       },
@@ -45,8 +44,8 @@ const LoginDoctor = () => {
       try {
         event.preventDefault();
         setIsLoading(true);
-        if (username == "" || password == "") {
-          toast.error("Please Fill Up Username and Password");
+        if (username === "" || password === "") {
+          toast.error("Please fill in both Username and Password");
           return;
         }
 
@@ -55,42 +54,26 @@ const LoginDoctor = () => {
             "Content-Type": "application/json",
           },
         };
+
         const { data } = await axios.post(
           `${import.meta.env.VITE_BACKENDURL}/api/v1/user/doctorLogin`,
-          {
-            username,
-            password,
-          },
+          { username, password },
           { withCredentials: true },
           config
         );
 
-        if (data.msg == "Successfully Login") {
-          toast.success("Successfully Login");
-          // setIsLoggedIn(true);
+        if (data.msg === "Successfully Login") {
+          toast.success("Successfully Logged In");
           localStorage.setItem("token", data.jwt);
-          setUserId(data.userId)
-          setUser(data.user)
-          // console.log(data.jwt)
-          // localStorage.setItem("isLoggedIn", {
-          //     value: true,
-          //     expiry: now.getTime() + 15  * 24 * 60 * 60
-          // });
+          setUserId(data.userId);
+          setUser(data.user);
           navigate("/");
-        } else if (data.msg == "Input are not correct") {
-          toast.error("Input are not correct");
-        } else if (data.msg == "Admin don't access you") {
-          toast.error("Admin don't access you");
-        } else if (data.msg == "You are not Registered!") {
-          toast.error("You are not Registered!");
-        } else if (data.msg == "Password is wrong!") {
-          toast.error("Password is wrong!");
         } else {
-          toast.error("Fill Up Again");
+          toast.error(data.msg || "Invalid Credentials");
         }
       } catch (error) {
-        toast.error("Try Again Some Issue Occur");
-        console.log(error);
+        toast.error("An error occurred. Try again!");
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
@@ -98,32 +81,29 @@ const LoginDoctor = () => {
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      {/* <Sign/> */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          alt="Your Company"
-          src="doctor.png"
-          // src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-          className="mx-auto h-20 w-auto"
-        />
-        <h2 className="mt-4 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-          Sign in to your account
+    <div className="min-h-screen bg-gradient-to-r from-sky-500 to-blue-700 flex items-center justify-center p-6">
+      <div className="w-full max-w-md p-8 bg-white shadow-2xl rounded-3xl transform hover:scale-105 transition duration-500">
+        <div className="flex justify-center">
+          <div className="bg-blue-500 text-white p-4 rounded-full shadow-lg">
+            <FaUserMd size={50} />
+          </div>
+        </div>
+        <h2 className="text-3xl font-bold text-center text-blue-600 mt-6">
+          Doctor Login
         </h2>
-      </div>
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6">
-          {noInput.map((ele, idx) => {
-            return <InputContainer key={idx} detail={ele} />;
-          })}
-          {/* <Link to={"/forgetpass"} className="text-blue-600 underline my-3 block">Forget Password!</Link> */}
+
+        <form className="mt-8 space-y-6">
+          {noInput.map((ele, idx) => (
+            <InputContainer key={idx} detail={ele} />
+          ))}
           {isLoading ? <Loading /> : <Btn btninfo={btninfo} />}
         </form>
-        <p className="mt-10 text-center text-sm/6 text-gray-500">
-          Not a member?{" "}
+
+        <p className="mt-6 text-center text-gray-600">
+          Not registered?{" "}
           <Link
             to="/registerDoctor"
-            className="font-semibold text-indigo-600 hover:text-indigo-500"
+            className="text-blue-500 hover:underline font-medium"
           >
             Register as Doctor
           </Link>

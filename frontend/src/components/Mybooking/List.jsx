@@ -8,6 +8,7 @@ import {
   MapPinIcon,
   ChartBarIcon,
   SparklesIcon,
+  VideoCameraIcon 
 } from "@heroicons/react/20/solid";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -17,25 +18,33 @@ import { useState } from "react";
 import RatingPopup from "../Rating/RatingPopup";
 import toast from "react-hot-toast";
 import axios from "axios";
+import MeetingLinkPopup from "./MeetingLinkPopup";
 
-export default function List({
-  showApproveButton,
-  setVerifiedDoctors,
-  setNotVerifiedDoctors,
-  verifiedDoctors,
-  notVerifiedDoctors,
-  bookingDetails,
-}) {
+export default function List({ bookingDetails }) {
   const [isLoading, setIsLoading] = useState(false);
   const user = useRecoilValue(userRecoil);
   const userid = useRecoilValue(userId);
   const setBookings = useSetRecoilState(booking);
   const setAppointments = useSetRecoilState(Atoms.appointments);
-  const navigate = useNavigate();
+  const [meetLink, setMeetLink] = useState("");
+  const status = bookingDetails?.status || "pending"; // Default to "pending" if status is missing
   // console.dir(bookingDetails);
+  const navigate = useNavigate();
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [openPopupCancel, setOpenPopupCancel] = useState(false);
+
+  // Determine the color and label based on status
+  const getStatusStyles = () => {
+    switch (status.toLowerCase()) {
+      case "completed":
+        return "bg-green-500 text-white"; // Green for Confirm
+      case "cancelled":
+        return "bg-red-500 text-white"; // Red for Cancel
+      default:
+        return "bg-yellow-500 text-white"; // Yellow for Pending
+    }
+  };
 
   const handleOpenPopup = () => {
     setIsPopupOpen(true);
@@ -252,10 +261,71 @@ export default function List({
     }
   };
 
+
+  // Save the Meeting Link
+  
+  const handleShare = async (bookingId, meetLink) => {
+    if (!meetLink) {
+      toast.error("Please enter a valid Meet link");
+      return;
+    }
+
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BACKENDURL}/api/v1/booking/shareMeetLink`,
+        { bookingId, meetLink },
+        { withCredentials: true }
+      );
+
+      toast.success("Meet link shared successfully!");
+      console.log(data);
+    } catch (error) {
+      toast.error("Failed to share Meet link");
+      console.error(error);
+    }
+  };
+
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [link, setLink] = useState("");
+  const [error, setError] = useState("");
+
+  // Regex for basic URL validation
+  const urlRegex = /^(https?:\/\/)?([\w\d-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/i;
+
+  const openPopup = () => setIsOpen(true);
+  const closePopup = () => setIsOpen(false);
+
+  const handleChange = (e) => {
+    setLink(e.target.value);
+    setError("");  // Clear error on change
+  };
+
+  const handleSubmit = () => {
+    if (urlRegex.test(link)) {
+      toast.success("Valid meeting link!");
+      // handleSaveLink(link);  // Pass the link to parent component
+      handleShare(bookingDetails?._id, link)
+      closePopup();
+      setLink("");
+    } else {
+      setError("Invalid link format. Please enter a valid URL.");
+      toast.error("Invalid link format.");
+    }
+  };
+
+
   return (
-    <div className={``}>
+    <div className={`relative bg-white shadow-lg rounded-lg overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-2xl w-full lg:w-[80vw] p-6 mb-6`}>
+      {/* Status Indicator */}
       <div
-        className={`shadow-lg w-[80vw] p-4 rounded-md lg:flex lg:items-center lg:justify-between ${
+        className={`absolute top-2 right-2 px-3 py-1 text-xs font-bold rounded-full ${getStatusStyles()}`}
+      >
+        {status.charAt(0).toUpperCase() + status.slice(1)}{" "}
+        {/* Capitalize status */}
+      </div>
+      <div
+        className={` ${
           bookingDetails?.status == "cancelled" && user != "Patient"
             ? "hidden"
             : "block"
@@ -263,13 +333,13 @@ export default function List({
       >
         <div className="min-w-0 flex-1">
           <h2 className="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-            {user == "Patient" || user == "Admin"
+            {user == "Patient"
               ? bookingDetails?.doctor_id?.name
               : bookingDetails?.patient_id?.name}
           </h2>
           <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
             <div className="mt-2 flex items-center text-sm text-gray-500">
-              {user == "Patient" || user == "Admin" ? (
+              {user == "Patient" ? (
                 <BriefcaseIcon
                   aria-hidden="true"
                   className="mr-1.5 size-5 shrink-0 text-gray-400"
@@ -278,12 +348,12 @@ export default function List({
                 <SparklesIcon className="mr-1.5 size-5 shrink-0 text-red-500" />
               )}
 
-              {user == "Patient" || user == "Admin"
+              {user == "Patient"
                 ? bookingDetails?.doctor_id?.qualification
                 : `Disease: ${bookingDetails?.patient_id?.disease}`}
             </div>
             <div className="mt-2 flex items-center text-sm text-gray-500">
-              {user == "Patient" || user == "Admin" ? (
+              {user == "Patient" ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -299,7 +369,7 @@ export default function List({
               ) : (
                 <ChartBarIcon className="-ml-0.5 mr-1 size-5 text-purple-500" />
               )}
-              {user == "Patient" || user == "Admin"
+              {user == "Patient"
                 ? bookingDetails?.doctor_id?.avgRating
                 : `Age: ${bookingDetails?.patient_id?.age}`}
             </div>
@@ -309,7 +379,7 @@ export default function List({
                 aria-hidden="true"
                 className="mr-1.5 size-5 text-gray-400"
               />
-              {user == "Patient" || user == "Admin"
+              {user == "Patient"
                 ? bookingDetails?.doctor_id?.location
                 : bookingDetails?.patient_id?.location}
             </div>
@@ -362,7 +432,7 @@ export default function List({
             </div>
           </div>
           {bookingDetails?.reason && user == "Patient" ? (
-            <p className="text-wrap truncate text-base overflow-hidden">
+            <p className="text-wrap truncate text-base overflow-hidden my-2">
               <span className="text-red-500 font-medium">
                 Reason (Booking Cancel) :{" "}
               </span>
@@ -375,9 +445,7 @@ export default function List({
           )}
         </div>
         <div className="mt-5  flex lg:ml-4 lg:mt-0">
-          {user == "Patient" &&
-          bookingDetails?.status !== "completed" &&
-          user !== "Admin" ? (
+          {user == "Patient" && bookingDetails?.status == "pending" ? (
             <span
               onClick={() => {
                 navigate("/bookingDoctor", {
@@ -417,7 +485,7 @@ export default function List({
 
           <span
             onClick={() => {
-              if (user == "Patient" || user == "Admin") {
+              if (user == "Patient") {
                 navigate("/doctordetails", {
                   state: { user: bookingDetails?.doctor_id },
                 });
@@ -459,7 +527,7 @@ export default function List({
             onClose={handleClosePopup}
             onSubmit={handleSubmitRating}
           />
-          {user == "Patient" && user !== "Admin" ? (
+          {user == "Patient" ? (
             <span
               onClick={() => {
                 handleOpenPopup();
@@ -498,12 +566,12 @@ export default function List({
             isOpen={openPopupCancel}
             onClose={handleClosePopupCancel}
             onSubmit={
-              user == "Patient" || user == "Admin"
+              user == "Patient"
                 ? handleCancelButtonByPatient
                 : handleCancelButtonByDoctor
             }
           />
-          {bookingDetails?.status !== "completed" && user !== "Admin" ? (
+          {bookingDetails?.status !== "completed" ? (
             <span
               onClick={() => {
                 handleOpenPopupCancel();
@@ -539,50 +607,87 @@ export default function List({
             ""
           )}
 
-          {user !== "Patient" &&
-          bookingDetails?.status !== "completed" &&
-          !bookingDetails?.doctor_id?.isVerify ? (
-            <span
-              onClick={user !== "Admin" ? handleExamined : handleDoctorVerified}
-              className="sm:ml-3"
-            >
-              {showApproveButton && (
-                <button
-                  type="button"
-                  className={`inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 `}
-                >
-                  <CheckIcon
-                    aria-hidden="true"
-                    className="-ml-0.5 mr-1.5 size-5"
-                  />
-                  {user !== "Admin" ? "Examined" : "Approve"}
-                </button>
-              )}
+          {user !== "Patient" && bookingDetails?.status !== "completed" ? (
+            <span onClick={handleExamined} className="sm:ml-3">
+              <button
+                type="button"
+                className={`inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 `}
+              >
+                <CheckIcon
+                  aria-hidden="true"
+                  className="-ml-0.5 mr-1.5 size-5"
+                />
+                Examined
+              </button>
             </span>
           ) : (
             ""
           )}
-          {user !== "Admin"  &&
-          bookingDetails?.doctor_id?.isVerify ? (
+          {/* <MeetingLinkPopup onSave={handleSaveLink} /> */}
+          {isOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                <h2 className="text-xl font-bold mb-4">Add Meeting Link</h2>
+
+                <textarea
+                  value={link}
+                  onChange={handleChange}
+                  placeholder="Enter meeting link (e.g., https://zoom.us/xyz)"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  rows="3"
+                />
+
+                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={closePopup}
+                    className="bg-gray-400 text-white px-4 py-2 rounded-lg mr-2 hover:bg-gray-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                  >
+                    Save Link
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {(user !== "Patient" || (user === "Patient" && bookingDetails?.meetLink)) && bookingDetails?.status === "pending" ? (
             <span
-              onClick={console.log("meet")}
+              onClick={() => {
+                // handleShare(bookingDetails?._id);
+                // openPopup()
+                // {user !== "Patient" ? openPopup() : console.log( "Join Meet")}
+                if (user !== "Patient") {
+                  if (!bookingDetails?.meetLink) {
+                    openPopup();
+                  } else {
+                    window.open(bookingDetails?.meetLink, "_blank");  // Open the link in a new tab
+                  }
+                } else {
+                  bookingDetails?.meetLink
+                    ? window.open(bookingDetails?.meetLink, "_blank")
+                    : toast.error("No meeting link available.");
+                }
+              }}
               className="sm:ml-3"
             >
-              { (
+              {
                 <button
                   type="button"
                   className={`inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 `}
                 >
-                  <CheckIcon
-                    aria-hidden="true"
-                    className="-ml-0.5 mr-1.5 size-5"
-                  />
-                  {user !== "Patient" ? "Create Meet" : "Join Meet"}
+                  <VideoCameraIcon className="-ml-0.5 mr-1.5 size-5" />
+                  {user !== "Patient" && !bookingDetails?.meetLink ? "Create Meet" : "Join Meet"}
                 </button>
-              )}
+              }
             </span>
           ) : (
-            ""
+            <div/>
           )}
 
           {/* Dropdown */}

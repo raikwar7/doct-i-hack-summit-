@@ -213,10 +213,8 @@ const DoctorRegister = () => {
   ];
 
   return (
-    <>
-      {/* <h1 className="text-4xl p-4 font-semibold text-center text-heading">
-        Patient Registration
-      </h1> */}
+    <div className="min-h-screen bg-gradient-to-r from-sky-500 to-blue-700 flex flex-col items-center justify-center p-6">
+      <div className="bg-white shadow-2xl rounded-2xl max-w-lg w-full p-8 transition-transform duration-300">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           alt="Your Company"
@@ -239,7 +237,8 @@ const DoctorRegister = () => {
           {isLoading ? <Loading /> : <Btn btninfo={btninfo} />}
         </form>
       </div>
-    </>
+      </div>
+    </div>
   );
 };
 

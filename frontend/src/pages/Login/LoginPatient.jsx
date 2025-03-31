@@ -7,20 +7,21 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useRecoilState } from "recoil";
 import Atoms from "../../Recoils/Atoms";
+import { FaUserMd } from "react-icons/fa";
 
-const LoginDoctor = () => {
+const LoginPatient = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [userId, setUserId] = useRecoilState(Atoms.userId)
-  const [user, setUser] = useRecoilState(Atoms.userRecoil)
+  const [userId, setUserId] = useRecoilState(Atoms.userId);
+  const [user, setUser] = useRecoilState(Atoms.userRecoil);
 
   const noInput = [
     {
       label: "Username",
       id: "username",
-      placeholder: "gaurav@gmail.com",
+      placeholder: "doctor@gmail.com",
       inputType: "text",
       onchange: (event) => {
         setUsername(event.target.value);
@@ -31,7 +32,6 @@ const LoginDoctor = () => {
       id: "password",
       placeholder: "*********",
       inputType: "password",
-      Icon: "",
       onchange: (event) => {
         setPassword(event.target.value);
       },
@@ -44,53 +44,43 @@ const LoginDoctor = () => {
       try {
         event.preventDefault();
         setIsLoading(true);
-        if (username == "" || password == "") {
-          toast.error("Please Fill Up Username and Password");
+
+        if (username === "" || password === "") {
+          toast.error("Please fill in both fields.");
           return;
         }
-        
+
         const config = {
           headers: {
             "Content-Type": "application/json",
           },
         };
+
         const { data } = await axios.post(
           `${import.meta.env.VITE_BACKENDURL}/api/v1/user/patientLogin`,
-          {
-            username,
-            password,
-          },
+          { username, password },
           { withCredentials: true },
           config
         );
 
-        if (data.msg == "Successfully Login") {
-          toast.success("Successfully Login");
-          // setIsLoggedIn(true);
-          localStorage.setItem("token", data.jwt)
-          setUserId(data.userId)
-          setUser(data.user)
-          // console.log(data.jwt)
-          // localStorage.setItem("isLoggedIn", {
-          //     value: true,
-          //     expiry: now.getTime() + 15  * 24 * 60 * 60
-          // });
+        if (data.msg === "Successfully Login") {
+          toast.success("Logged in successfully!");
+          localStorage.setItem("token", data.jwt);
+          setUserId(data.userId);
+          setUser(data.user);
           navigate("/");
-        } else if (data.msg == "Input are not correct") {
-          toast.error("Input are not correct");
-        } else if (data.msg == "You are not Registered!") {
-          toast.error("You are not Registered!");
-        } else if (data.msg == "Password is wrong!") {
-          toast.error("Password is wrong!");
+        } else if (data.msg === "Input are not correct") {
+          toast.error("Invalid Credentials.");
+        } else if (data.msg === "You are not Registered!") {
+          toast.error("User not registered.");
+        } else if (data.msg === "Password is wrong!") {
+          toast.error("Incorrect password.");
         } else {
-          toast.error("Fill Up Again");
+          toast.error("Please try again.");
         }
-
-
-
       } catch (error) {
-        toast.error("Try Again Some Issue Occur");
-        console.log(error);
+        toast.error("An error occurred. Please try again.");
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
@@ -98,38 +88,49 @@ const LoginDoctor = () => {
   };
 
   return (
-    <>
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          alt="Your Company"
-          src="user-profile.png"
-          // src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-          className="mx-auto h-20 w-auto"
-        />
-        <h2 className="mt-4 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-          Sign in to your account
+    <div className="min-h-screen bg-gradient-to-r from-sky-500 to-blue-700 flex items-center justify-center p-6">
+      <div className="bg-white shadow-2xl rounded-2xl max-w-lg w-full p-8 transition-transform duration-300 hover:scale-105">
+        {/* Doctor Icon */}
+        <div className="flex justify-center">
+          <div className="bg-blue-500 text-white p-4 rounded-full shadow-lg">
+            <FaUserMd size={50} />
+          </div>
+        </div>
+        <h2 className="text-3xl font-bold text-center text-blue-600 mt-6">
+          Patient Login
         </h2>
-      </div>
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6">
-          {noInput.map((ele, idx) => {
-            return <InputContainer key={idx} detail={ele} />;
-          })}
-          {/* <Link to={"/forgetpass"} className="text-blue-600 underline my-3 block">Forget Password!</Link> */}
-          {isLoading ? <Loading /> : <Btn btninfo={btninfo} />}
+
+        {/* Form */}
+        <form className="space-y-6 mt-8">
+          {noInput.map((ele, idx) => (
+            <InputContainer key={idx} detail={ele} />
+          ))}
+
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <Btn
+              btninfo={btninfo}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-all duration-300"
+            />
+          )}
         </form>
-        <p className="mt-10 text-center text-sm/6 text-gray-500">
-                  Not a member?{" "}
-                  <Link
-                    to="/registerPatient"
-                    className="font-semibold text-indigo-600 hover:text-indigo-500"
-                  >
-                    Register as Patient
-                  </Link>
-                </p>
+
+        {/* Links */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-600">
+            Not a member?{" "}
+            <Link
+              to="/registerPatient"
+              className="text-blue-500 font-medium hover:underline"
+            >
+              Register as Patient
+            </Link>
+          </p>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default LoginDoctor;
+export default LoginPatient;

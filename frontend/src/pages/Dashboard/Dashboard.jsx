@@ -8,16 +8,7 @@ const Dashboard = () => {
   const user = useRecoilValue(userRecoil)
   return (
     <div className="text-lg">
-      Dashboard
-      {/* <DoctorRegister/> */}
-      {/* <Sign/> */}
       {user=="Patient"? <Mybooking/>: <Bookings/>}
-      
-      
-      
-      {/* <Mybooking/>
-      <Bookings/> */}
-      {/* <List/> */}
     </div>
   )
 }

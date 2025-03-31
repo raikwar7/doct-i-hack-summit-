@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import Atoms from "../../Recoils/Atoms";
 import Loading from "../../components/Loading";
-// import { storage } from "./firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid"; // For unique file names
 import { storage } from "../../../utils/firebase";
@@ -19,18 +18,16 @@ const BookDoctor = () => {
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
-  const [url, setUrl] = useState("");
-  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (doctor_id == "") {
+    if (doctor_id === "") {
       toast.error("Select Doctor");
       navigate("/searchDoctors");
-      return;
     }
   }, []);
 
+  // Handle date change
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
   };
@@ -45,24 +42,28 @@ const BookDoctor = () => {
     const uploadedFile = e.target.files[0];
     if (uploadedFile) {
       setFile(uploadedFile);
-      setFilePreview(URL.createObjectURL(uploadedFile)); // Generate preview
+      setFilePreview(
+        uploadedFile.type === "application/pdf"
+          ? "pdf_icon.png"
+          : URL.createObjectURL(uploadedFile)
+      );
     }
   };
 
-   // 🔥 Upload file and return the download URL
-   const uploadFile = async () => {
+  // Upload file to Firebase
+  const uploadFile = async () => {
     try {
       if (!file) return null;
 
-      const fileName = `${uuidv4()}-${file.name}`; // Unique file name
+      const fileName = `${uuidv4()}-${file.name}`;
       const fileRef = ref(storage, `reportFiles/${fileName}`);
 
-      await uploadBytes(fileRef, file); // Upload the file
-      const downloadURL = await getDownloadURL(fileRef); // Get file URL
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
 
       console.log("File uploaded:", downloadURL);
       toast.success("File uploaded successfully");
-      return downloadURL;  // Return the URL for API usage
+      return downloadURL;
     } catch (error) {
       toast.error("File upload failed");
       console.error(error);
@@ -70,32 +71,29 @@ const BookDoctor = () => {
     }
   };
 
-
-
   // Handle form submission
   const handleSubmit = async (e) => {
-    try {
-      e.preventDefault();
-      setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
-      if (!slot || !selectedDate) {
-        toast.error("Please fill all important fields.");
+    if (!slot || !selectedDate) {
+      toast.error("Please fill all important fields.");
+      setIsLoading(false);
+      return;
+    }
+
+    let fileUrl = "";
+
+    if (file) {
+      fileUrl = await uploadFile();
+      if (!fileUrl) {
+        toast.error("File upload failed!");
+        setIsLoading(false);
         return;
       }
+    }
 
-      let fileUrl = "";
-
-      if (file) {
-        // Wait until the file is uploaded before proceeding
-        fileUrl = await uploadFile();
-
-        if (!fileUrl) {
-          toast.error("File upload failed!");
-          setIsLoading(false);
-          return;
-        }
-      }      
-
+    try {
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -114,36 +112,38 @@ const BookDoctor = () => {
         { withCredentials: true },
         config
       );
-      if (data.msg == "Booked Successfully") {
+
+      if (data.msg === "Booked Successfully") {
         toast.success("Booked Successfully!");
-        console.log(data)
         navigate("/");
-      } else if (data.msg == "Booking Exist") {
+      } else if (data.msg === "Booking Exist") {
         toast.success("Booking Exist");
       } else {
         toast.error("Some mistake in your inputs");
       }
     } catch (error) {
       toast.error("Error on Backend Side");
-      console.log(error)
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Get current date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="my-4 bg-gray-100 flex justify-center items-center">
+    <div className="min-h-screen bg-sky-100 flex items-center justify-center p-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md"
+        className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg transition-all duration-300 hover:shadow-2xl"
       >
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Booking Form</h2>
-        {/* Slot Selection */}
+        <h2 className="text-3xl font-extrabold text-sky-600 mb-6 text-center">
+          Book a Doctor
+        </h2>
+
+        {/* Date Selection */}
         <div className="mb-4">
-          <label htmlFor="date" className="block text-gray-700 mb-2">
+          <label htmlFor="date" className="block text-gray-700 font-medium mb-2">
             Select Date:
           </label>
           <input
@@ -152,17 +152,17 @@ const BookDoctor = () => {
             value={selectedDate}
             onChange={handleDateChange}
             min={today}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-sky-500 transition"
           />
         </div>
 
         {/* Slot Selection */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Select Slot:</label>
+          <label className="block text-gray-700 font-medium mb-2">Select Slot:</label>
           <select
             value={slot}
             onChange={handleSlotChange}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-sky-500 transition"
           >
             <option value="">-- Choose a Slot --</option>
             <option value="9 AM - 10 AM">9 AM - 10 AM</option>
@@ -174,27 +174,34 @@ const BookDoctor = () => {
 
         {/* File Upload */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">
-            Upload Report File (Optional):
+          <label className="block text-gray-700 font-medium mb-2">
+            Upload Report (Optional):
           </label>
           <input
             type="file"
             accept=".pdf,.jpg,.png"
             onChange={handleFileChange}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-3 border rounded-lg shadow-sm transition focus:ring-2 focus:ring-sky-500"
           />
-          <p>Formate - .pdf .jpg .png</p>
+          <p className="text-sm text-gray-500 mt-1">Formats: .pdf, .jpg, .png</p>
         </div>
 
         {/* File Preview */}
         {filePreview && (
           <div className="mb-4">
-            <p className="text-gray-700 mb-2">File Preview:</p>
-            <img
-              src={file?.type == "application/pdf" ? "pdf.png" : filePreview}
-              alt="Preview"
-              className="w-full object-cover h-40 rounded-lg"
-            />
+            <p className="text-gray-700 font-medium mb-2">File Preview:</p>
+            {file?.type === "application/pdf" ? (
+              <div className="flex justify-center items-center bg-gray-100 p-4 rounded-lg">
+                <img src="pdf_icon.png" alt="PDF Icon" className="w-16" />
+                <span className="ml-4">{file.name}</span>
+              </div>
+            ) : (
+              <img
+                src={filePreview}
+                alt="Preview"
+                className="w-full h-40 object-cover rounded-lg shadow-md"
+              />
+            )}
           </div>
         )}
 
@@ -204,7 +211,7 @@ const BookDoctor = () => {
         ) : (
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
           >
             Submit Booking
           </button>

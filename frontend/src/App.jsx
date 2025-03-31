@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import "./App.css";
 import Page404 from "./pages/Page404";
 import Home from "./pages/Home";
@@ -25,6 +25,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useRecoilState(isLoginIn);
   const [user, setUser] = useRecoilState(userRecoil);
   const [userId, setUserId] = useRecoilState(Atoms.userId)
+  const navigate = useNavigate()
 
   const checkLoggedIn = async () => {
     try {
@@ -66,18 +67,24 @@ function App() {
   }, [isLoggedIn, user, userId]);
 
   useEffect(() => {
+    if(isLoggedIn){
+      navigate("/dashboard")
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname]);
 
   return (
     <>
       <Navbar />
-      {user}
-      {userId}
+      {/* {user}
+      {userId} */}
       <Toaster position="top-center" />
       <Routes>
         <Route path="/" element={<Home />}></Route>
-        {/* <Route path="/dashboard" element={<Dashboard />}></Route> */}
+        <Route path="/dashboard" element={<Dashboard />}></Route>
         <Route path="/admin" element={<Admin />}></Route>
         {/* <Route path="/signin" element={<SignIn />}></Route> */}
         <Route path="/registerDoctor" element={<DoctorRegister />}></Route>

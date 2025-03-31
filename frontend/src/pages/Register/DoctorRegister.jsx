@@ -323,7 +323,8 @@ const DoctorRegister = () => {
     },
   ]
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-r from-sky-500 to-blue-700 flex flex-col items-center justify-center p-6">
+      <div className="bg-white shadow-2xl rounded-2xl max-w-lg w-full p-8 transition-transform duration-300">
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-1 lg:px-8">
         <img
           alt="Your Company"
@@ -349,7 +350,8 @@ const DoctorRegister = () => {
           {isLoading ? <Loading /> : <Btn btninfo={btninfo} />}
         </form>
       </div>
-    </>
+      </div>
+    </div>
   );
 };
 

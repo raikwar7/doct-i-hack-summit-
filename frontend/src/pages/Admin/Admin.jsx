@@ -7,6 +7,8 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import Atoms from "../../Recoils/Atoms";
 import axios from "axios";
 import toast from "react-hot-toast";
+
+import { FaCheckCircle, FaTimesCircle, FaUserMd, FaSpinner } from "react-icons/fa";
 // import List from "../../components/Mybooking/List";
 
 const Admin = () => {
@@ -129,10 +131,12 @@ const Admin = () => {
   }, [userId]);
 
   return (
-    <div>
-      {/* <Mybooking /> */}
-      <div className="flex border-b">
-        {/* Tabs */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-900 p-10">
+      <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-8">
+      <h1 className="text-4xl font-bold text-center text-blue-700 mb-6">
+          Admin Panel
+        </h1>
+        {/* <div className="flex border-b">
         <button
           className={`p-4 ${
             activeTab === "verified"
@@ -153,7 +157,31 @@ const Admin = () => {
         >
           Not Verified Doctors
         </button>
-      </div>
+      </div> */}
+      {/* Tabs */}
+      <div className="flex justify-center mb-8">
+          <button
+            className={`px-6 py-3 mx-2 rounded-lg text-lg font-semibold transition ${
+              activeTab === "verified"
+                ? "bg-blue-500 text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+            }`}
+            onClick={() => setActiveTab("verified")}
+          >
+            <FaCheckCircle className="inline mr-2" /> Verified Doctors
+          </button>
+
+          <button
+            className={`px-6 py-3 mx-2 rounded-lg text-lg font-semibold transition ${
+              activeTab === "notVerified"
+                ? "bg-red-500 text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-red-100"
+            }`}
+            onClick={() => setActiveTab("notVerified")}
+          >
+            <FaTimesCircle className="inline mr-2" /> Not Verified Doctors
+          </button>
+        </div>
       {loading ? (
         <p className="text-center my-8">Loading...</p>
       ) : (
@@ -209,6 +237,7 @@ const Admin = () => {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 };
