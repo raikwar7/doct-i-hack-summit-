@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #333;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>BMI Report</h1>
+    <h3>Your BMI: {{ bmi }}</h3>
+    <p><strong>Category:</strong> {{ category }}</p>
+
+    <h4>Recommendations:</h4>
+    <table border="1" cellspacing="0" cellpadding="8" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr>
+                <th>Aspect</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Health Implications</strong></td>
+                <td>{{ recommendations['Health Implications'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Diet Tips</strong></td>
+                <td>{{ recommendations['Diet Tips'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Examples of Foods</strong></td>
+                <td>{{ recommendations['Examples of Foods'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Exercise Routine</strong></td>
+                <td>{{ recommendations['Exercise Routine'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Lifestyle Tips</strong></td>
+                <td>{{ recommendations['Lifestyle Tips'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Snack Ideas</strong></td>
+                <td>{{ recommendations['Snack Ideas'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Hydration Tips</strong></td>
+                <td>{{ recommendations['Hydration Tips'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Supplements</strong></td>
+                <td>{{ recommendations['Supplements'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Cooking Tips</strong></td>
+                <td>{{ recommendations['Cooking Tips'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Daily Calorie Range</strong></td>
+                <td>{{ recommendations['Daily Calorie Range'] }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5>Example Diet Plan:</h5>
+    <table border="1" cellspacing="0" cellpadding="8" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr>
+                <th>Meal Plan</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for meal in recommendations['Example Diet Plan'] %}
+            <tr>
+                <td>{{ meal }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
+

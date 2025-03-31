@@ -85,13 +85,13 @@
     <nav class="navbar">
         <div class="logo">Doct-i</div>
         <div class="nav-links">
-            <a href="{{ url_for('insurances') }}">Insurance</a>
+           
 
             <a href="http://localhost:3000" target="_blank">Bookings</a>
 
             <a href="https://github.com/yourrepo" target="_blank">GitHub</a>
 
-            <a href="{{ url_for('bmi') }}">Wellness Navigator</a>
+            <a href="{{ url_for('insurances') }}">Insurances</a>
             
         </div>
     </nav>
@@ -199,7 +199,7 @@
         </div>
     </div>
 </footer>
-    <script src="{{ url_for('static', filename='img.js') }}"></script>
+    <script src="{{ url_for('static', filename='img.js') }}"></script><script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
     <df-messenger
       intent="WELCOME"

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <!-- Use Flask's url_for to reference static CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='bmi.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>BMI Calculator</h1>
+        <form id="bmiForm">
+            <label for="height">Height (in meters):</label>
+            <input type="number" id="height" name="height" step="0.01" required>
+
+            <label for="weight">Weight (in kilograms):</label>
+            <input type="number" id="weight" name="weight" step="0.1" required>
+
+            <button type="submit">Calculate BMI</button>
+        </form>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <!-- Use Flask's url_for to reference static JavaScript -->
+    <script src="{{ url_for('static', filename='bmi.js') }}"></script>
+</body>
+</html>
