@@ -1,4 +1,4 @@
-🚀 Doct-i: AI-Powered Healthcare Assistant
+🚀 #Doct-i: AI-Powered Healthcare Assistant
 "Where Health and Convenience Are at Your Fingertips."
 
 🎯 Overview
